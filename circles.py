@@ -47,7 +47,12 @@ def drawCircle(x, y, diameter, colour = 1):
         thumby.display.drawRectangle(x - 1, y - 1, 3, 3, colour)
         return
 
-    evenModifier = -1 if diameter % 2 == 0 else 0 # Width/height reduction when the diamter is even
+    evenModifier = -1 if diameter % 2 == 0 else 0 # Width/height reduction when the diameter is even
+
+    # Cache objects
+    setPixel = thumby.display.setPixel
+    drawLine = thumby.display.drawLine
+    steps = circleSizes[diameter]
 
     radiusFloor = math.floor(diameter / 2)
     top = y - radiusFloor
@@ -55,47 +60,47 @@ def drawCircle(x, y, diameter, colour = 1):
     left = x - radiusFloor
     right = x + radiusFloor + evenModifier
 
-    prevInset2 = circleSizes[diameter][0]
+    prevInset2 = steps[0]
 
     # inset1 = loop iteration, inset2 = pixel offset
-    for inset1, inset2 in enumerate(circleSizes[diameter]):
+    for inset1, inset2 in enumerate(steps):
         if inset1 == 0:
             # Straight sides
-            thumby.display.drawLine(left + inset2, top, right - inset2, top, colour) # Top
-            thumby.display.drawLine(right, top + inset2, right, bottom - inset2, colour) # Right
-            thumby.display.drawLine(right - inset2, bottom, left + inset2, bottom, colour) # Bottom
-            thumby.display.drawLine(left, bottom - inset2, left, top + inset2, colour) # Left
+            drawLine(left + inset2, top, right - inset2, top, colour) # Top
+            drawLine(right, top + inset2, right, bottom - inset2, colour) # Right
+            drawLine(right - inset2, bottom, left + inset2, bottom, colour) # Bottom
+            drawLine(left, bottom - inset2, left, top + inset2, colour) # Left
         else:
             extra = prevInset2 - 1 - inset2 # Extra length possibly needed for this line
 
             # If the current inset2 has reduced by more than 1
             if extra > 0:
                 # Draw lines
-                thumby.display.drawLine(left + inset1, top + inset2, left + inset1, top + inset2 + extra, colour) # WNW
-                thumby.display.drawLine(left + inset2, top + inset1, left + inset2 + extra, top + inset1, colour) # NNW
-                thumby.display.drawLine(right - inset2, top + inset1, right - inset2 - extra, top + inset1, colour) # NNE
-                thumby.display.drawLine(right - inset1, top + inset2, right - inset1, top + inset2 + extra, colour) # ENE
-                thumby.display.drawLine(right - inset2, bottom - inset1, right - inset2 - extra, bottom - inset1, colour) # ESE
-                thumby.display.drawLine(right - inset1, bottom - inset2, right - inset1, bottom - inset2 - extra, colour) # SSE
-                thumby.display.drawLine(left + inset2, bottom - inset1, left + inset2 + extra, bottom - inset1, colour) # SSW
-                thumby.display.drawLine(left + inset1, bottom - inset2, left + inset1, bottom - inset2 - extra, colour) # WSW
+                drawLine(left + inset1, top + inset2, left + inset1, top + inset2 + extra, colour) # WNW
+                drawLine(left + inset2, top + inset1, left + inset2 + extra, top + inset1, colour) # NNW
+                drawLine(right - inset2, top + inset1, right - inset2 - extra, top + inset1, colour) # NNE
+                drawLine(right - inset1, top + inset2, right - inset1, top + inset2 + extra, colour) # ENE
+                drawLine(right - inset2, bottom - inset1, right - inset2 - extra, bottom - inset1, colour) # ESE
+                drawLine(right - inset1, bottom - inset2, right - inset1, bottom - inset2 - extra, colour) # SSE
+                drawLine(left + inset2, bottom - inset1, left + inset2 + extra, bottom - inset1, colour) # SSW
+                drawLine(left + inset1, bottom - inset2, left + inset1, bottom - inset2 - extra, colour) # WSW
             else:
                 # Otherwise draw dots
-                thumby.display.setPixel(left + inset1, top + inset2, colour) # WNW
-                thumby.display.setPixel(left + inset2, top + inset1, colour) # NNW
-                thumby.display.setPixel(right - inset2, top + inset1, colour) # NNE
-                thumby.display.setPixel(right - inset1, top + inset2, colour) # ENE
-                thumby.display.setPixel(right - inset2, bottom - inset1, colour) # ESE
-                thumby.display.setPixel(right - inset1, bottom - inset2, colour) # SSE
-                thumby.display.setPixel(left + inset2, bottom - inset1, colour) # SSW
-                thumby.display.setPixel(left + inset1, bottom - inset2, colour) # WSW
+                setPixel(left + inset1, top + inset2, colour) # WNW
+                setPixel(left + inset2, top + inset1, colour) # NNW
+                setPixel(right - inset2, top + inset1, colour) # NNE
+                setPixel(right - inset1, top + inset2, colour) # ENE
+                setPixel(right - inset2, bottom - inset1, colour) # ESE
+                setPixel(right - inset1, bottom - inset2, colour) # SSE
+                setPixel(left + inset2, bottom - inset1, colour) # SSW
+                setPixel(left + inset1, bottom - inset2, colour) # WSW
 
         prevInset2 = inset2
 
     # Possibly fill in the four corners
-    if prevInset2 > len(circleSizes[diameter]):
+    if prevInset2 > len(steps):
         inset1 = inset1 + 1
-        thumby.display.setPixel(left + inset1, top + inset1, colour) # NW
-        thumby.display.setPixel(right - inset1, top + inset1, colour) # NE
-        thumby.display.setPixel(right - inset1, bottom - inset1, colour) # SE
-        thumby.display.setPixel(left + inset1, bottom - inset1, colour) # SW
+        setPixel(left + inset1, top + inset1, colour) # NW
+        setPixel(right - inset1, top + inset1, colour) # NE
+        setPixel(right - inset1, bottom - inset1, colour) # SE
+        setPixel(left + inset1, bottom - inset1, colour) # SW
