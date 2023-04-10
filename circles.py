@@ -52,7 +52,7 @@ def drawCircle(x, y, diameter, colour = 1):
     # Cache objects
     setPixel = thumby.display.setPixel
     drawLine = thumby.display.drawLine
-    steps = circleSizes[diameter]
+    steps = circleSizes.get(diameter, [])
 
     radiusFloor = math.floor(diameter / 2)
     top = y - radiusFloor
@@ -80,8 +80,8 @@ def drawCircle(x, y, diameter, colour = 1):
                 drawLine(left + inset2, top + inset1, left + inset2 + extra, top + inset1, colour) # NNW
                 drawLine(right - inset2, top + inset1, right - inset2 - extra, top + inset1, colour) # NNE
                 drawLine(right - inset1, top + inset2, right - inset1, top + inset2 + extra, colour) # ENE
-                drawLine(right - inset2, bottom - inset1, right - inset2 - extra, bottom - inset1, colour) # ESE
-                drawLine(right - inset1, bottom - inset2, right - inset1, bottom - inset2 - extra, colour) # SSE
+                drawLine(right - inset1, bottom - inset2, right - inset1, bottom - inset2 - extra, colour) # ESE
+                drawLine(right - inset2, bottom - inset1, right - inset2 - extra, bottom - inset1, colour) # SSE
                 drawLine(left + inset2, bottom - inset1, left + inset2 + extra, bottom - inset1, colour) # SSW
                 drawLine(left + inset1, bottom - inset2, left + inset1, bottom - inset2 - extra, colour) # WSW
             else:
@@ -90,8 +90,8 @@ def drawCircle(x, y, diameter, colour = 1):
                 setPixel(left + inset2, top + inset1, colour) # NNW
                 setPixel(right - inset2, top + inset1, colour) # NNE
                 setPixel(right - inset1, top + inset2, colour) # ENE
-                setPixel(right - inset2, bottom - inset1, colour) # ESE
-                setPixel(right - inset1, bottom - inset2, colour) # SSE
+                setPixel(right - inset1, bottom - inset2, colour) # ESE
+                setPixel(right - inset2, bottom - inset1, colour) # SSE
                 setPixel(left + inset2, bottom - inset1, colour) # SSW
                 setPixel(left + inset1, bottom - inset2, colour) # WSW
 
@@ -104,3 +104,64 @@ def drawCircle(x, y, diameter, colour = 1):
         setPixel(right - inset1, top + inset1, colour) # NE
         setPixel(right - inset1, bottom - inset1, colour) # SE
         setPixel(left + inset1, bottom - inset1, colour) # SW
+
+def drawFilledCircle(x, y, diameter, colour = 1):
+    if diameter == 1 or diameter == 2:
+        drawCircle(x, y, diameter, colour)
+        return
+
+    # Cache objects
+    setPixel = thumby.display.setPixel
+    drawLine = thumby.display.drawLine
+    drawFilledRectangle = thumby.display.drawFilledRectangle
+    steps = circleSizes.get(diameter, [])
+
+    if diameter == 3:
+        setPixel(x, y, colour)
+        setPixel(x - 1, y, colour)
+        setPixel(x + 1, y, colour)
+        setPixel(x, y - 1, colour)
+        setPixel(x, y + 1, colour)
+        return
+
+    evenModifier = -1 if diameter % 2 == 0 else 0 # Width/height reduction when the diameter is even
+
+    radiusFloor = math.floor(diameter / 2)
+    top = y - radiusFloor
+    bottom = y + radiusFloor + evenModifier
+    left = x - radiusFloor
+    right = x + radiusFloor + evenModifier
+
+    prevInset2 = steps[0]
+
+    # inset1 = loop iteration, inset2 = pixel offset
+    for inset1, inset2 in enumerate(steps):
+        if inset1 == 0:
+            # Straight sides
+            drawFilledRectangle(left, top + inset2, diameter, (bottom - inset2) - (top + inset2) + 1, colour) # Left-right
+            drawLine(left + inset2, top, right - inset2, top, colour) # Top
+            drawLine(right - inset2, bottom, left + inset2, bottom, colour) # Bottom
+        else:
+            extra = prevInset2 - 1 - inset2 # Extra length possibly needed for this line
+
+            # If the current inset2 has reduced by more than 1
+            if extra > 0:
+                # Draw rectangles
+                drawLine(left + inset2, top + inset1, right - inset2, top + inset1, colour) # Upper outer
+                drawFilledRectangle(left + inset1, top + inset2, (right - inset1) - (left + inset1) + 1, 1 + extra, colour) # Upper inner
+                drawFilledRectangle(left + inset1, bottom - inset2 - extra, (right - inset1) - (left + inset1) + 1, 1 + extra, colour) # Lower inner
+                drawLine(left + inset2, bottom - inset1, right - inset2, bottom - inset1, colour) # Lower outer
+            else:
+                # Otherwise draw horizontal lines
+                drawLine(left + inset2, top + inset1, right - inset2, top + inset1, colour) # Upper outer
+                drawLine(left + inset1, top + inset2, right - inset1, top + inset2, colour) # Upper inner
+                drawLine(left + inset1, bottom - inset2, right - inset1, bottom - inset2, colour) # Lower inner
+                drawLine(left + inset2, bottom - inset1, right - inset2, bottom - inset1, colour) # Lower outer
+
+        prevInset2 = inset2
+
+    # Possibly fill in the two middle lines
+    if prevInset2 > len(steps):
+        inset1 = inset1 + 1
+        drawLine(left + inset1, top + inset1, right - inset1, top + inset1, colour) # Upper
+        drawLine(left + inset1, bottom - inset1, right - inset1, bottom - inset1, colour) # Lower
