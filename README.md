@@ -20,5 +20,20 @@ Add all the files to `/Games/CirclePreview/` on your Thumby and run `/Games/Circ
 ## Method
 As a compromise between render speed and file size, the circles are not computed mathematically per se. Instead, pixel drawing instructions are manually pre-calculated for an eighth of a circle of each diameter. The pixels are draw with eight-way symmetry to complete the circle. It draws a circle in a similar way to the [midpoint circle algorithm](https://en.wikipedia.org/wiki/Midpoint_circle_algorithm) except the points are pre-calculated and the flat sides are drawn all at once. The filled circles are drawn with the same inputs but use horizontal lines to fill the shape.
 
+### Draw Performance
+Tests conducted using `CirclePreview.py` running on a real Thumby device (purchased 2023) with MicroPython v1.19.1.
+
+| Circle Type | Diameter 4 | Diameter 64 |
+| --- | --- | --- |
+| Hollow | 0.43 ms | 2.47 ms |
+| Filled | 0.45 ms | 4.04 ms |
+
+#### Midpoint Circle Algorithm Implementation (for comparison)
+
+| Circle Type | Diameter 4 | Diameter 64 |
+| --- | --- | --- |
+| Hollow | 1.46 ms | 12.06 ms |
+| Filled | N/A | N/A |
+
 ## Supported Circle Sizes
 By default, circles with a diameter between 1-64 are supported. These are defined in the `circleSizes` object. You can add you own sizes or remove ones that you do not need (to save space).
